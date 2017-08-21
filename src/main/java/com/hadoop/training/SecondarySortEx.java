@@ -36,7 +36,7 @@ public class SecondarySortEx {
 			
 			// Name,age,gender,marks
 			String[] words = value.toString().split(",");
-			String compositeKey = words[2]+"+"+words[3];
+			String compositeKey = words[2]+","+words[3];
 			logger.info("Key:"+compositeKey+" Value:"+value);
 			context.write(new Text(compositeKey), value);
 		}
@@ -62,8 +62,8 @@ public class SecondarySortEx {
 		@Override
 		public int getPartition(Text key, Text value, int numPartitions) {
 			
-			int age = Integer.parseInt(key.toString().split("+")[1]);
-			
+			int age = Integer.parseInt(value.toString().split(",")[1]);
+			logger.info("Age:"+age);
 			if(age < 15){
 				return 0;
 			}else if (age >= 15 && age <20 ){
@@ -76,17 +76,27 @@ public class SecondarySortEx {
 		
 	}
 	
-	static class SecSortComparator extends WritableComparator{
+	public static class SecSortComparator extends WritableComparator{
 
+		protected SecSortComparator(){
+			super(Text.class,true);
+		}
 		@Override
 		public int compare(WritableComparable wc1,WritableComparable wc2) {
 			
+			
 			Text key1 = (Text) wc1;
 			Text key2 = (Text) wc2;
-			IntWritable marks1 = new IntWritable(Integer.parseInt(key1.toString().split("+")[1]));
-			IntWritable marks2 = new IntWritable(Integer.parseInt(key2.toString().split("+")[1]));
+			Text gender1 = new Text(key1.toString().split(",")[0]);
+			Text gender2 = new Text(key2.toString().split(",")[0]);
+			
+			logger.info("key1:"+key1.toString());
+			logger.info("key2:"+key2.toString());
+			
+			IntWritable marks1 = new IntWritable(Integer.parseInt(key1.toString().split(",")[1]));
+			IntWritable marks2 = new IntWritable(Integer.parseInt(key2.toString().split(",")[1]));
                   // compare them
-			int cmp = key1.compareTo(key2);
+			int cmp = gender1.compareTo(gender2);
 			if(cmp !=0){
 				return cmp;
 			}
@@ -94,15 +104,19 @@ public class SecondarySortEx {
 		  }
 	}
 	
-	static class SecGrpComparator extends WritableComparator{
+	public static class SecGrpComparator extends WritableComparator{
 
+		protected SecGrpComparator(){
+			super(Text.class,true);
+		}
+		
 		@Override
 		public int compare(WritableComparable wc1,WritableComparable wc2) {
 			
 			Text key1 = (Text) wc1;
 			Text key2 = (Text) wc2;
-			IntWritable marks1 = new IntWritable(Integer.parseInt(key1.toString().split("+")[1]));
-			IntWritable marks2 = new IntWritable(Integer.parseInt(key2.toString().split("+")[1]));
+			IntWritable marks1 = new IntWritable(Integer.parseInt(key1.toString().split(",")[1]));
+			IntWritable marks2 = new IntWritable(Integer.parseInt(key2.toString().split(",")[1]));
                   // compare them
 			int cmp = key1.compareTo(key2);
 				return cmp;
